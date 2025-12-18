@@ -122,3 +122,4 @@ while running:
             break
         
 exit("terminating the program...")
+#end of the game
