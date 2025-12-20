@@ -1,15 +1,13 @@
 #Bulls & Cows
 #functions and support values:
 Separator = "-" * 47
-Text_game_start = f"""{Separator}
-I've generated a random 4 digit number for you.
-Let's play a bulls and cows game."""
-Text_user_choise = f"""{Separator}
-That's amazing!
+Text_game_start = f"""I've generated a random 4 digit number for you.
+Let's play a bulls and cows game.
 {Separator}
-You've just guess correctly,
-if want to play again type in 'continue',
-or if you want exit type in 'exit'.
+Enter a number:"""
+Text_user_choise = f"""{Separator}
+If want to play again type in "again"
+or if you want exit type in "exit".
 {Separator}"""
 
 def number_generation(number_lenght : int = 4) -> str: 
@@ -18,41 +16,57 @@ def number_generation(number_lenght : int = 4) -> str:
     This funcion geterates special game number.
     The baseline rules:
     1) the first digit can not be 0
-    2) no digict can be the same"""
+    2) no digict can be the same
+    (the baseline lenght of the number is 4 digits)"""
     
     import random
     
+    #generation of first digit
     game_number = random.randint(1,9) #first digit -> != 0
     avalable_numbers = list(range(10))
     avalable_numbers.remove(game_number)
     game_number = str(game_number)
 
+    #genneration of other digits
     for i in range(1,number_lenght):
         number = random.choice(avalable_numbers)
         avalable_numbers.remove(number)
         game_number += str(number)
-
     return(game_number)
 
 def user_number_input(game_number : str):
     f"""
     Docstring for user_number_input
-    Asks user for number for one try in game.
-    The function does not accept input that go against number generation rules:
+    It asks user for number.
+    The function does not accept input that 
+    go against number generation rules:
     {number_generation.__doc__}\n 
     It returns the user input as str or 
-    nothing if the input does not match the rules - 
-    it this case it prints error mesage."""
+    False if the input does not match the rules
+    and in this case it prints error mesage."""
 
-    #chyba - nepozna to ze v pokusu je vice stejnych cisel a pom 
-    #to prida vice cows etc.
     print(Separator)
     user_guess = input(">>> ")
-    if user_guess.isdigit() and len(user_guess) == len(game_number) and user_guess[0] != 0:
-        return(user_guess) 
+    if user_guess == "help": #only for testing
+        print(game_number)
+    #check if there are only digits
+    if not user_guess.isdigit():
+        print("Your guess need to be from numbers, try again.")
     else:
-        print("Your input does not work, try again.")
-        return(False)
+        #check if the length is OK
+        if not len(user_guess) == len(game_number):
+            print(f"Lenght of your guess need to be {len(game_number)} digits, try again.")
+        else:
+            #check if it starts with 0
+            if user_guess[0] == 0:
+                print(f"Your guess mustn't start with 0, try again.")
+            else:
+                #check if there are same digits
+                if len(set(user_guess)) < len(user_guess):
+                    print("Your guess mustn't contain same digits, try again.")
+                else:
+                    return(user_guess) 
+    return(False)
     
 def plural(number : int) -> str:
     """
@@ -69,9 +83,11 @@ def number_verification(game_number : str, user_guess : str, attemps_number : in
     Docstring for number_verification
     The function compares user's guess with the target number. 
     It prints the bulls and cows for user.
-    If user guested correctly it prints message and number of attemps it took to find it.
+    If user guested correctly, it prints message
+    and number of attemps it took to find it.
     It returns True or False."""
 
+    #if the guess is correct
     if game_number == user_guess:
         print("Correct, you've guessed the right number,")
         if (plural_form := plural(attemps_number)):
@@ -79,31 +95,37 @@ def number_verification(game_number : str, user_guess : str, attemps_number : in
         print(f"in {attemps_number} guess{plural_form}!")
         return(True)
     
-    #nevim jestli chyba ale divne to pocita
+    #the message if the guess is not correct 
     bulls = 0
     cows = 0
     for digit in user_guess:
         if digit in game_number:
             if user_guess.index(digit) == game_number.index(digit):
                 bulls += 1
+                #print(f"for {digit} +1 bull") #only for testing
+            else:
+                cows += 1
+                #print(f"for {digit} +1 cow") #only for testing
         else:
-            cows += 1
-
+            #print(f"for {digit} nothing") #only for testing
+            pass
+    
     print(f"{bulls} bull{plural(bulls)}, {cows} cow{plural(cows)}")
 
 #the game
 print("Hi there!")
-print(Text_game_start)
+print(Separator)
 attemps_number = 0
-game_number = number_generation()
-print(game_number)
-#the game while loop
 running = True
-while running: 
+
+#the game while loop
+while running:
+
+    game_number = number_generation()
+    #print(game_number) #only for testing  
+    print(Text_game_start)
 
     #the while loop for guessing one number
-    print(Separator)
-    print("Enter a number:")  
     while True:
         attemps_number += 1
         if not (user_guess := user_number_input(game_number)):
@@ -112,13 +134,14 @@ while running:
             continue
         break
 
+    #question after succecful guess -> play again or exit
     print(Text_user_choise)
-    while (command := input(">>> ")) !=  "continue" or "exit":
+    while (command := input(">>> ")) !=  "again" or "exit":
         print(Separator)
-        if command == "continue":
+        if command == "again":
             break
         elif command == "exit":
             running = False 
             break
-        
+
 exit("terminating the program...")
